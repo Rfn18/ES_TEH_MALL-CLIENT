@@ -1,11 +1,13 @@
 import { AuthCard } from "../components/auth/AuthCard";
-import { User, Lock, Eye, EyeOff } from "lucide-react";
+import { User, Lock, Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 export const Register = () => {
   const [showPw1, setShowPw1] = useState<Boolean>(false);
   const [showPw2, setShowPw2] = useState<Boolean>(false);
+
+  const [loading, setLoading] = useState<Boolean>(false);
 
   const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ export const Register = () => {
     e.preventDefault();
     console.log(JSON.stringify(data));
     try {
+      setLoading(true);
       const response = await fetch("http://127.0.0.1:8000/api/register", {
         method: "POST",
         headers: {
@@ -35,11 +38,12 @@ export const Register = () => {
         throw new Error("error fetching data");
       }
 
-      const result = await response.json();
-      console.log("Success", result);
+      localStorage.setItem("alert", "true");
       navigate("/login");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,12 +123,23 @@ export const Register = () => {
               />
             )}
           </div>
-          <button
-            type="submit"
-            className="w-full h-12 auth-gradient rounded-xl text-white font-bold "
-          >
-            Register
-          </button>
+          {loading ? (
+            <button
+              disabled={true}
+              type="submit"
+              className="flex items-center justify-center gap-2 w-full h-12 auth-gradient rounded-xl text-white font-semibold text-sm cursor-pointer opacity-70"
+            >
+              <LoaderCircle className="size-4 animate-spin" />
+              Creating account...
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="w-full h-12 auth-gradient rounded-xl text-white font-semibold text-sm cursor-pointer hover:opacity-70 transition"
+            >
+              Register
+            </button>
+          )}
         </form>
         <p className="mt-2 self-center text-sm opacity-70">
           Already have an account?{" "}

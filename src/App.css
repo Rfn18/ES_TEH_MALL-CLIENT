@@ -1,3 +1,7 @@
 /* .container-authcard {
   padding: 20px;
 } */
+
+.auth-gradient {
+  background: linear-gradient(135deg, #119184 0%, hsl(174 70% 38%) 100%);
+}

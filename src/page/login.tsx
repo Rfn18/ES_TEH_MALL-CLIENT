@@ -1,7 +1,15 @@
-import { Eye, EyeClosed, Lock, User } from "lucide-react";
+import {
+  CircleCheck,
+  Eye,
+  EyeClosed,
+  LoaderCircle,
+  Lock,
+  User,
+} from "lucide-react";
 import { AuthCard } from "../components/auth/AuthCard";
-import { Link } from "react-router";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { Toast } from "../components/ui/Toast";
 
 export const Login = () => {
   const [showPw, setShowPw] = useState<boolean>(false);
@@ -9,6 +17,11 @@ export const Login = () => {
     username: "",
     password: "",
   });
+  const [alert, setAlert] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+  const bareer = localStorage.getItem("bareer_token");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -19,6 +32,7 @@ export const Login = () => {
     console.log(data);
 
     try {
+      setLoading(true);
       const response = await fetch("http://127.0.0.1:8000/api/login", {
         method: "POST",
         headers: {
@@ -33,14 +47,51 @@ export const Login = () => {
       }
 
       const result = await response.json();
-      console.log(result.access_token);
+
+      if (!bareer) {
+        localStorage.setItem("bareer_token", result.access_token);
+      } else {
+        localStorage.removeItem("bareer_token");
+        localStorage.setItem("bareer_token", result.access_token);
+      }
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const indicatorAlert = localStorage.getItem("alert");
+
+    if (indicatorAlert) {
+      setAlert(!alert);
+
+      setTimeout(() => {
+        localStorage.removeItem("alert");
+        setAlert(false);
+      }, 5000);
+    }
+  }, []);
+
   return (
     <AuthCard>
+      {alert && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleCheck size={20} className="text-[#119184]" />
+              <div className="text-[#119184]">
+                <h2 className="text-sm font-bold">Creating account...</h2>
+                <p className="text-sm">
+                  Welcome to TehMallPos. Please login to continue
+                </p>
+              </div>
+            </div>
+          }
+        />
+      )}
       <div className="w-full flex flex-col items-center gap-2">
         <h1 className="text-xl font-semibold">Login To Your Account</h1>
         <p className="text-sm opacity-70">Enter your credentials to continue</p>
@@ -86,9 +137,23 @@ export const Login = () => {
               />
             )}
           </div>
-          <button className="w-full h-12 auth-gradient rounded-xl text-white font-bold ">
-            Login
-          </button>
+          {loading ? (
+            <button
+              disabled={true}
+              type="submit"
+              className="flex items-center justify-center gap-2  w-full h-12 auth-gradient rounded-xl text-white font-semibold text-sm cursor-pointer opacity-70"
+            >
+              <LoaderCircle className="size-4 animate-spin" />
+              Loading...
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="w-full h-12 auth-gradient rounded-xl text-white font-semibold text-sm cursor-pointer hover:opacity-70 transition"
+            >
+              Login
+            </button>
+          )}
         </form>
         <p className="mt-2 self-center text-sm opacity-70">
           Don't have an account?{" "}

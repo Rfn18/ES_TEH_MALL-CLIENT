@@ -12,7 +12,44 @@ body {
 body {
   background-color: #f9fafb;
 }
+@theme {
+  --animate-showIn: showIn 1s ease;
+  --animate-showOut: showOut 1s ease;
+  @keyframes showIn {
+    0% {
+      opacity: 0;
+      transform: translateY(40px);
+      -webkit-transform: translateY(40px);
+      -moz-transform: translateY(40px);
+      -ms-transform: translateY(40px);
+      -o-transform: translateY(40px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      -webkit-transform: translateY(0);
+      -moz-transform: translateY(0);
+      -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+    }
+  }
 
-.auth-gradient {
-  background: linear-gradient(135deg, #119184 0%, hsl(174 70% 38%) 100%);
+  @keyframes showOut {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+      -webkit-transform: translateY(0);
+      -moz-transform: translateY(0);
+      -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(40px);
+      -webkit-transform: translateY(40px);
+      -moz-transform: translateY(40px);
+      -ms-transform: translateY(40px);
+      -o-transform: translateY(40px);
+    }
+  }
 }
