@@ -13,7 +13,6 @@ body {
   background-color: #f9fafb;
 }
 @theme {
-
   --animate-showIn: showIn 1s ease;
   --animate-showOut: showOut 1s ease;
   @keyframes showIn {

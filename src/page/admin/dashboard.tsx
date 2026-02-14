@@ -2,16 +2,15 @@ import {
   Banknote,
   Calculator,
   Package,
-  Play,
   Plus,
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
-import { Header } from "../components/ui/Header";
+import { Header } from "../../components/ui/Header";
 
 interface cardProps {
   title: string;
-  point: string;
+  point: string;  
   desc: string;
   icon: any;
 }
@@ -89,13 +88,13 @@ export const Dashboard = () => {
           </button>
         </div>
       </div>
-      <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl mt-8">
+      <div className="flex flex-col p-6 w-full bg-white border border-[#119184]/20 rounded-2xl mt-8">
         <div>
           <h1 className="flex items-center gap-2 font-semibold text-[#2f524a] text-xl">
             <Package size={20} /> Tambah Menu
           </h1>
         </div>
-        <div className="relative overflow-x-auto border border-[#119184]/20  rounded-xl mt-8">
+        {/* <div className="relative overflow-x-auto border border-[#119184]/20  rounded-xl mt-8">
           <table className="w-full text-[#2f524a] ">
             <thead className="font-semibold text-sm text-left p-2 bg-neutral-100  border-b border-[#119184]/20 ">
               <tr>
@@ -114,6 +113,11 @@ export const Dashboard = () => {
               </tr>
             </tbody>
           </table>
+        </div> */}
+        <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
+          <Package size={50} />
+          <h1 className="font-semibold mt-4">Belum ada list menu</h1>
+          <p className="text-sm">Tambahkan menu untuk melihat list menu.</p>
         </div>
       </div>
     </div>
