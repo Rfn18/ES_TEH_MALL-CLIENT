@@ -1,14 +1,12 @@
 import {
   Banknote,
   Calculator,
-  Layers,
+  Package,
+  Plus,
   ShoppingBag,
   TrendingUp,
-  UserRoundPlus,
-  UtensilsCrossed,
 } from "lucide-react";
-import { Header } from "../../components/ui/Header";
-import { CardForm } from "../../components/ui/CardForm";
+import { Header } from "../components/ui/Header";
 
 interface cardProps {
   title: string;
@@ -76,27 +74,51 @@ export const Dashboard = () => {
           }
         />
       </div>
-      <div className="mt-4 ">
-        <div>
-          <h1 className="font-bold text-2xl text-[#2f524a]">Management Menu</h1>
-          <p className="text-sm text-[#2f524a]/70">
-            Kelola kategori dan item menu untuk outlet Anda
-          </p>
+      <div className="flex gap-4 mt-8">
+        <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
+          <h1 className="font-semibold text-[#2f524a] text-xl">Tambah Menu</h1>
+          <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl">
+            <Plus size={20} /> Tambah List Menu
+          </button>
         </div>
-        <div className="mt-4 flex bg-[#119184]/10 w-fit p-1 rounded-xl">
-          <button className="flex items-center gap-2 text-sm font-semibold bg-[#ffff] text-black px-12 py-2 rounded-lg cursor-pointer">
-            <UtensilsCrossed size={16} /> Menu
-          </button>
-          <button className="flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer">
-            <Layers size={16} /> Jenis
-          </button>
-          <button className="flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer">
-            <UserRoundPlus size={16} /> User
+        <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
+          <h1 className="font-semibold text-[#2f524a] text-xl">Tambah Jenis</h1>
+          <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl">
+            <Plus size={20} /> Tambah jenis menu
           </button>
         </div>
       </div>
-      <div className="p-6 mt-4 w-full bg-white border border-[#119184]/20 rounded-2xl">
-        <CardForm />
+      <div className="flex flex-col p-6 w-full bg-white border border-[#119184]/20 rounded-2xl mt-8">
+        <div>
+          <h1 className="flex items-center gap-2 font-semibold text-[#2f524a] text-xl">
+            <Package size={20} /> Tambah Menu
+          </h1>
+        </div>
+        {/* <div className="relative overflow-x-auto border border-[#119184]/20  rounded-xl mt-8">
+          <table className="w-full text-[#2f524a] ">
+            <thead className="font-semibold text-sm text-left p-2 bg-neutral-100  border-b border-[#119184]/20 ">
+              <tr>
+                <th className="px-6 py-3">KD-Menu</th>
+                <th>Nama</th>
+                <th>Jenis</th>
+                <th>Harga</th>
+              </tr>
+            </thead>
+            <tbody className="font-semibold text-sm text-left p-2  ">
+              <tr className="border-b border-[#119184]/20 text-heading whitespace-nowrap">
+                <td className="px-6 py-3">MNU-270326-1</td>
+                <td>Es Teh</td>
+                <td>Cup Jumbo</td>
+                <td>Rp. 3000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div> */}
+        <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
+          <Package size={50} />
+          <h1 className="font-semibold mt-4">Belum ada list menu</h1>
+          <p className="text-sm">Tambahkan menu untuk melihat list menu.</p>
+        </div>
       </div>
     </div>
   );
