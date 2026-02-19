@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Header } from "../../components/ui/Header";
 import { CardForm } from "../../components/ui/CardForm";
+import { useState } from "react";
 
 interface cardProps {
   title: string;
@@ -17,7 +18,11 @@ interface cardProps {
   icon: any;
 }
 
+export type TabType = "menu" | "jenis" | "user";
+
 export const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("menu");
+
   const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
     return (
       <div className="flex justify-between p-6 w-full bg-white border border-[#119184]/20 rounded-2xl hover:shadow-sm transition">
@@ -84,19 +89,28 @@ export const Dashboard = () => {
           </p>
         </div>
         <div className="mt-4 flex bg-[#119184]/10 w-fit p-1 rounded-xl">
-          <button className="flex items-center gap-2 text-sm font-semibold bg-[#ffff] text-black px-12 py-2 rounded-lg cursor-pointer">
+          <button
+            className={`flex items-center gap-2 text-sm font-semibold px-12 py-2 rounded-lg cursor-pointer ${activeTab === "menu" ? "bg-[#ffff] text-black" : "text-black"}`}
+            onClick={() => setActiveTab("menu")}
+          >
             <UtensilsCrossed size={16} /> Menu
           </button>
-          <button className="flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer">
+          <button
+            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "jenis" ? "bg-[#ffff] text-black" : ""}`}
+            onClick={() => setActiveTab("jenis")}
+          >
             <Layers size={16} /> Jenis
           </button>
-          <button className="flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer">
+          <button
+            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "user" ? "bg-[#ffff] text-black" : ""}`}
+            onClick={() => setActiveTab("user")}
+          >
             <UserRoundPlus size={16} /> User
           </button>
         </div>
       </div>
       <div className="p-6 mt-4 w-full bg-white border border-[#119184]/20 rounded-2xl">
-        <CardForm />
+        <CardForm activeTab={activeTab} />
       </div>
     </div>
   );
