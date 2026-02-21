@@ -291,7 +291,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   return (
     <>
       {renderForm()}
-      <TableList />
+      <TableList activeTab={activeTabState} />
     </>
   );
 };

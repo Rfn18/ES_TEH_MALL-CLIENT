@@ -2,7 +2,7 @@ import {
   Banknote,
   Calculator,
   Package,
-  Plus,
+  Play,
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
@@ -15,7 +15,7 @@ interface cardProps {
   icon: any;
 }
 
-export const Dashboard = () => {
+export const UserDashboard = () => {
   const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
     return (
       <div className="flex justify-between p-6 w-full bg-white border border-[#119184]/20 rounded-2xl hover:shadow-sm transition">
@@ -76,15 +76,11 @@ export const Dashboard = () => {
       </div>
       <div className="flex gap-4 mt-8">
         <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
-          <h1 className="font-semibold text-[#2f524a] text-xl">Tambah Menu</h1>
+          <h1 className="font-semibold text-[#2f524a] text-xl">
+            Start Transactions
+          </h1>
           <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl">
-            <Plus size={20} /> Tambah List Menu
-          </button>
-        </div>
-        <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
-          <h1 className="font-semibold text-[#2f524a] text-xl">Tambah Jenis</h1>
-          <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl">
-            <Plus size={20} /> Tambah jenis menu
+            <Play size={20} /> Mulai Transaksi Hari Ini
           </button>
         </div>
       </div>
