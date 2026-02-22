@@ -1,8 +1,66 @@
-import { Pencil, Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Package, Pencil, Search, Trash, User } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { TabType } from "../../page/admin/dashboard";
+import { ToRupiah } from "../Tools/ToRupiah";
 
-const ListMenu = () => {
+interface Filters {
+  searchTerm: string;
+  jenis: string;
+}
+
+interface MenuTableProps {
+  kd_menu: string;
+  jenis_id: string;
+  nama_menu: string;
+  jenis: {
+    nama_jenis: string;
+  };
+  biaya_produksi: number;
+  harga_satuan: number;
+}
+
+interface JenisTableProps {
+  kd_jenis: string;
+  nama_jenis: string;
+}
+
+interface UserTableProps {
+  id: number;
+  name: string;
+  password: string;
+  role: string;
+}
+
+const ListMenu = ({
+  data,
+  jenis,
+  onDelete,
+}: {
+  data: MenuTableProps[];
+  jenis: JenisTableProps[];
+  onDelete: (kd_menu: string) => void;
+}) => {
+  const [jenisList, setJenisList] = useState<JenisTableProps[]>([]);
+  const [filters, setFilters] = useState<Filters>({
+    searchTerm: "",
+    jenis: "",
+  });
+
+  useEffect(() => {
+    setJenisList(jenis);
+  }, [data, jenis]);
+
+  const filteredData = useMemo(() => {
+    return data.filter((data) => {
+      const nameMatch = data.nama_menu
+        .toLowerCase()
+        .includes(filters.searchTerm.toLowerCase());
+      const jenisMatch = filters.jenis ? data.jenis_id === filters.jenis : true;
+      return nameMatch && jenisMatch;
+    });
+  }, [data, filters]);
+  const empty = filteredData.length === 0;
+
   return (
     <>
       <div className="flex items-center justify-center gap-4 mt-4">
@@ -14,6 +72,10 @@ const ListMenu = () => {
             id="search"
             placeholder="Cari menu..."
             className="w-full bg-transparent focus:outline-none ml-2 text-sm text-[#2f524a]"
+            onChange={(e) =>
+              setFilters({ ...filters, searchTerm: e.target.value })
+            }
+            value={filters.searchTerm}
           />
         </div>
         <div className="ml-4">
@@ -21,83 +83,113 @@ const ListMenu = () => {
             name="jenis_menu"
             id="jenis_menu"
             className="border border-[#119184]/20 bg-[#f9fafb] w-50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#119184]/50 text-sm text-[#2f524a]"
+            onChange={(e) => setFilters({ ...filters, jenis: e.target.value })}
           >
             <option value="">Pilih Jenis</option>
-            <option value="cup_besar">cup_besar</option>
-            <option value="cup_kecil">cup_kecil</option>
-            <option value="rasa_rasa">rasa_rasa</option>
+            {jenisList.map((data, index) => (
+              <option key={index} value={data.kd_jenis}>
+                {data.nama_jenis}
+              </option>
+            ))}
           </select>
         </div>
       </div>
       <div className="mt-4">
-        <table className="w-full text-left gap-2">
-          <thead>
-            <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
-              <th className="p-4">Kode </th>
-              <th className="p-4">Nama Menu</th>
-              <th className="p-4">Jenis</th>
-              <th className="p-4">Harga</th>
-              <th className="p-4">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className=" text-md font-semibold text-[#2f524a]">
-            <tr className="border-b border-[#119184]/20">
-              <td className="p-4">JNS-260218-002</td>
-              <td className="p-4">Es Teh Manis</td>
-              <td className="p-4">cup_besar</td>
-              <td className="p-4">Rp. 5000</td>
-              <td className="p-4">
-                <button className="text-sm text-[#2f524a]px-4 py-2 cursor-pointer">
-                  <Pencil size={16} className="text-[#2f524a]" />
-                </button>
-                <button className="text-sm text-[#f44336] px-4 py-2 ml-2 cursor-pointer">
-                  <Trash size={16} className="text-[#f44336]" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {empty ? (
+          <>
+            <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
+              <Package size={50} />
+              <h1 className="font-semibold mt-4">Belum ada list menu</h1>
+              <p className="text-sm">Tambahkan menu untuk melihat list menu.</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <table className="w-full text-left gap-2">
+              <thead>
+                <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
+                  <th className="p-4">Kode </th>
+                  <th className="p-4">Nama Menu</th>
+                  <th className="p-4">Jenis</th>
+                  <th className="p-4">Biaya Produksi</th>
+                  <th className="p-4">Harga Satuan</th>
+                  <th className="p-4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className=" text-md font-semibold text-[#2f524a]">
+                {filteredData.map((data, index) => (
+                  <tr className="border-b border-[#119184]/20" key={index}>
+                    <td className="p-4">{data.kd_menu}</td>
+                    <td className="p-4">{data.nama_menu}</td>
+                    <td className="p-4">{data.jenis.nama_jenis}</td>
+                    <td className="p-4">{ToRupiah(data.biaya_produksi)}</td>
+                    <td className="p-4">{ToRupiah(data.harga_satuan)}</td>
+                    <td className="p-4">
+                      <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                        <Pencil size={16} className="text-[#2f524a]" />
+                      </button>
+                      <button
+                        className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition"
+                        onClick={() => onDelete(data.kd_menu)}
+                      >
+                        <Trash size={16} className="text-[#f44336]" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </>
   );
 };
 
-const ListJenis = () => {
+const ListJenis = ({
+  jenis,
+  onDelete,
+}: {
+  jenis: JenisTableProps[];
+  onDelete: (kd_jenis: string) => void;
+}) => {
+  const [jenisList, setJenisList] = useState<JenisTableProps[]>([]);
+
+  useEffect(() => {
+    setJenisList(jenis);
+  }, [jenis]);
+
   return (
     <>
       <div className=" mt-4">
-        <div className="flex border border-[#119184]/20 bg-[#f9fafb] focus:outline-none focus:ring-2 focus:ring-[#119184]/50 text-sm text-[#2f524a] w-100 rounded-lg px-4 py-2">
-          <Search size={20} className=" text-[#2f524a]/70" />
-          <input
-            type="text"
-            name="search" 
-            id="search"
-            placeholder="Cari jenis..."
-            className="w-50 bg-transparent focus:outline-none ml-2 text-sm text-[#2f524a]"
-          />
-        </div>
         <div className="mt-4">
           <table className="w-full text-left gap-2">
             <thead>
               <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
-                <th className="p-4">Kode </th>
-                <th className="p-4">Nama Jenis</th>
-                <th className="p-4">Aksi</th>
+                <th className="p-4 w-1/3">Kode </th>
+                <th className="p-4 w-1/3">Nama Jenis</th>
+                <th className="p-4 w-1/3">Aksi</th>
               </tr>
             </thead>
             <tbody className=" text-md font-semibold text-[#2f524a]">
-              <tr className="border-b border-[#119184]/20">
-                <td className="p-4">JNS-20260219-0001</td>
-                <td className="p-4">Cup Besar</td>
-                <td className="p-4">
-                  <button className="text-sm text-[#2f524a]px-4 py-2 cursor-pointer">
-                    <Pencil size={16} className="text-[#2f524a]" />
-                  </button>
-                  <button className="text-sm text-[#f44336] px-4 py-2 ml-2 cursor-pointer">
-                    <Trash size={16} className="text-[#f44336]" />
-                  </button>
-                </td>
-              </tr>
+              {jenisList.map((data, index) => (
+                <tr className="border-b border-[#119184]/20" key={index}>
+                  <td className="p-4">{data.kd_jenis}</td>
+                  <td className="p-4">{data.nama_jenis}</td>
+                  <td className="p-4">
+                    <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                      <Pencil size={16} className="text-[#2f524a]" />
+                    </button>
+                    <button className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition">
+                      <Trash
+                        size={16}
+                        className="text-[#f44336]"
+                        onClick={() => onDelete(data.kd_jenis)}
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -106,7 +198,28 @@ const ListJenis = () => {
   );
 };
 
-const ListUser = () => {
+const ListUser = ({
+  user,
+  onDelete,
+}: {
+  user: UserTableProps[];
+  onDelete: (id: number) => void;
+}) => {
+  const [filters, setFilters] = useState<Filters>({
+    searchTerm: "",
+    jenis: "",
+  });
+  const filteredUser = useMemo(() => {
+    return user.filter((data) => {
+      const nameMatch = data.name
+        .toLowerCase()
+        .includes(filters.searchTerm.toLowerCase());
+      const jenisMatch = filters.jenis ? data.role === filters.jenis : true;
+      return nameMatch && jenisMatch;
+    });
+  }, [user, filters]);
+  const empty = filteredUser.length === 0;
+
   return (
     <>
       <div className="flex items-center justify-center gap-4 mt-4">
@@ -118,6 +231,10 @@ const ListUser = () => {
             id="search"
             placeholder="Cari user..."
             className="w-full bg-transparent focus:outline-none ml-2 text-sm text-[#2f524a]"
+            onChange={(e) =>
+              setFilters({ ...filters, searchTerm: e.target.value })
+            }
+            value={filters.searchTerm}
           />
         </div>
         <div className="ml-4">
@@ -125,44 +242,79 @@ const ListUser = () => {
             name="jenis_user"
             id="jenis_user"
             className="border border-[#119184]/20 bg-[#f9fafb] w-50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#119184]/50 text-sm text-[#2f524a]"
+            onChange={(e) => setFilters({ ...filters, jenis: e.target.value })}
           >
             <option value="">Pilih Jenis</option>
-            <option value="cup_besar">admin</option>
-            <option value="cup_kecil">kasir</option>
+            <option value="admin">admin</option>
+            <option value="kasir">kasir</option>
           </select>
         </div>
       </div>
       <div className="mt-4">
-        <table className="w-full text-left gap-2">
-          <thead>
-            <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
-              <th className="p-4">ID </th>
-              <th className="p-4">Nama</th>
-              <th className="p-4">Jenis</th>
-              <th className="p-4">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className=" text-md font-semibold text-[#2f524a]">
-            <tr className="border-b border-[#119184]/20">
-              <td className="p-4">1</td>
-              <td className="p-4">Faster</td>
-              <td className="p-4">admin</td>
-              <td className="p-4">
-                <button className="text-sm text-[#2f524a]px-4 py-2 cursor-pointer">
-                  <Pencil size={16} className="text-[#2f524a]" />
-                </button>
-                <button className="text-sm text-[#f44336] px-4 py-2 ml-2 cursor-pointer">
-                  <Trash size={16} className="text-[#f44336]" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {empty ? (
+          <>
+            <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
+              <User size={50} />
+              <h1 className="font-semibold mt-4">Belum ada list user</h1>
+              <p className="text-sm">Tambahkan user untuk melihat list user.</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <table className="w-full text-left gap-2">
+              <thead>
+                <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
+                  <th className="p-4 w-1/4">ID </th>
+                  <th className="p-4 w-1/4">Nama</th>
+                  <th className="p-4 w-1/4">Jenis</th>
+                  <th className="p-4 w-1/4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className=" text-md font-semibold text-[#2f524a]">
+                {filteredUser.map((data, index) => (
+                  <tr className="border-b border-[#119184]/20" key={index}>
+                    <td className="p-4">{data.id}</td>
+                    <td className="p-4">{data.name}</td>
+                    <td className="p-4">{data.role}</td>
+                    <td className="p-4">
+                      <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                        <Pencil size={16} className="text-[#2f524a]" />
+                      </button>
+                      <button className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition">
+                        <Trash
+                          size={16}
+                          className="text-[#f44336]"
+                          onClick={() => onDelete(data.id)}
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </>
   );
 };
-export const TableList = ({ activeTab }: { activeTab: TabType }) => {
+export const TableList = ({
+  activeTab,
+  data,
+  jenis,
+  user,
+  onDeleteMenus,
+  onDeleteJenis,
+  onDeleteUser,
+}: {
+  activeTab: TabType;
+  data?: MenuTableProps[];
+  jenis?: JenisTableProps[];
+  user?: UserTableProps[];
+  onDeleteMenus: (kd_menu: string) => void;
+  onDeleteJenis: (kd_jenis: string) => void;
+  onDeleteUser: (id: number) => void;
+}) => {
   const [activeTabState, setActiveTabState] = useState<TabType>("menu");
 
   useEffect(() => {
@@ -172,11 +324,17 @@ export const TableList = ({ activeTab }: { activeTab: TabType }) => {
   const renderList = () => {
     switch (activeTabState) {
       case "menu":
-        return <ListMenu />;
+        return (
+          <ListMenu
+            data={data || []}
+            jenis={jenis || []}
+            onDelete={onDeleteMenus}
+          />
+        );
       case "jenis":
-        return <ListJenis />;
+        return <ListJenis jenis={jenis || []} onDelete={onDeleteJenis} />;
       case "user":
-        return <ListUser />;
+        return <ListUser user={user || []} onDelete={onDeleteUser} />;
       default:
         return null;
     }

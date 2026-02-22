@@ -23,7 +23,7 @@ export const Toast = ({ message }: any) => {
 
   return (
     <div
-      className={`z-10 absolute bottom-10 right-10 flex items-center gap-4 p-4 rounded-xl bg-white shadow-2xl ${animateOut ? "animate-showOut" : "animate-showIn"}`}
+      className={`z-10 fixed bottom-10 right-10 flex items-center gap-4 p-4 rounded-xl bg-white shadow-2xl ${animateOut ? "animate-showOut" : "animate-showIn"}`}
     >
       {message}
     </div>
