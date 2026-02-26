@@ -3,6 +3,7 @@ import {
   Calculator,
   Layers,
   ShoppingBag,
+  Store,
   TrendingUp,
   UserRoundPlus,
   UtensilsCrossed,
@@ -18,7 +19,7 @@ interface cardProps {
   icon: any;
 }
 
-export type TabType = "menu" | "jenis" | "user";
+export type TabType = "menu" | "jenis" | "user" | "stand";
 
 export const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>("menu");
@@ -106,6 +107,12 @@ export const Dashboard = () => {
             onClick={() => setActiveTab("user")}
           >
             <UserRoundPlus size={16} /> User
+          </button>
+          <button
+            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "stand" ? "bg-[#ffff] text-black" : ""}`}
+            onClick={() => setActiveTab("stand")}
+          >
+            <Store size={16} /> Stand
           </button>
         </div>
       </div>

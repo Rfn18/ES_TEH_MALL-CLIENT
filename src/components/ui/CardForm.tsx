@@ -6,7 +6,7 @@ import { Toast } from "./Toast";
 
 const url: string = import.meta.env.VITE_BASE_URL;
 
-type TabType = "menu" | "jenis" | "user";
+type TabType = "menu" | "jenis" | "stand" | "user";
 
 interface MenuForm {
   kd_menu: string;
@@ -24,8 +24,21 @@ interface JenisForm {
 interface UserForm {
   id: number;
   name: string;
+  email: string;
+  stand_id: string;
   password: string;
   role: string;
+  stand: {
+    nama_stand: string | null;
+    lokasi: string | null;
+  };
+}
+
+interface StandForm {
+  id: number;
+  kd_stand: string;
+  nama_stand: string;
+  lokasi: string;
 }
 
 // fetch props
@@ -372,16 +385,20 @@ const FormJenis = ({
 
 const FormUser = ({
   user,
+  stand,
   onAdd,
 }: {
   user: UserForm[];
+  stand: StandForm[];
   onAdd: (newUser: UserForm) => void;
 }) => {
   const [form, setForm] = useState<UserForm>({
     id: 1,
     name: "",
+    email: "",
     password: "",
     role: "",
+    stand_id: "",
   });
   const [disable, setDisable] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -389,7 +406,7 @@ const FormUser = ({
   const [showPw, setShowPw] = useState<boolean>(false);
 
   useEffect(() => {
-    if (form.name === "" || form.password === "") {
+    if (form.name === "" || form.password === "" || form.stand_id === "") {
       setDisable(true);
     } else {
       setDisable(false);
@@ -427,8 +444,7 @@ const FormUser = ({
 
   const lastIDUser = user[user.length - 1]?.id;
   useEffect(() => {
-    setForm((prev) => ({ ...prev, id: lastIDUser }));
-    console.log(lastIDUser);
+    setForm((prev) => ({ ...prev, id: lastIDUser + 1 }));
   }, [lastIDUser]);
 
   return (
@@ -466,6 +482,17 @@ const FormUser = ({
           />
         </div>
         <div className={fieldCls}>
+          <label className={labelCls}>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="cth: admin@example.com"
+            className={inputCls}
+          />
+        </div>
+        <div className={fieldCls}>
           <label className={labelCls}>Password</label>
           <div
             className={`flex items-center bg-[#f9fafb] w-full h-10 mb-2 border border-[#ddd] rounded-lg`}
@@ -492,6 +519,184 @@ const FormUser = ({
               />
             )}
           </div>
+        </div>
+        <div className={fieldCls}>
+          <label className={labelCls}>Stand</label>
+          <select
+            name="stand_id"
+            value={form.stand_id}
+            onChange={handleChange}
+            className={inputCls}
+          >
+            <option value="">Pilih Stand</option>
+            {stand.map((data) => (
+              <option key={data.kd_stand} value={data.kd_stand}>
+                {data.nama_stand}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={fieldCls}>
+          <label className={labelCls}>Role</label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            className={inputCls}
+          >
+            <option value="">Pilih Role</option>
+            <option value="admin">Admin</option>
+            <option value="kasir">Kasir</option>
+          </select>
+        </div>
+
+        {loading ? (
+          <button
+            disabled={true}
+            type="submit"
+            className="flex items-center justify-center gap-4 self-end py-2 px-4 bg-[#119184]/70 text-white rounded-lg transition-colors cursor-not-allowed col-span-1 opacity-50"
+          >
+            <LoaderCircle className="size-4 animate-spin" />
+            Loading...
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={disable}
+            className={`self-end py-2 px-4 bg-[#119184]/70 text-white rounded-lg ${disable ? "transition-colors cursor-not-allowed col-span-1 opacity-50 " : "hover:bg-[#0d7a6d] transition-colors cursor-pointer col-span-1"}`}
+          >
+            + Simpan
+          </button>
+        )}
+      </form>
+    </>
+  );
+};
+
+const FormStand = ({
+  stand,
+  onAdd,
+}: {
+  stand: StandForm[];
+  onAdd: (newUser: StandForm) => void;
+}) => {
+  const [form, setForm] = useState<StandForm>({
+    id: 0,
+    kd_stand: "STD-260218-001",
+    nama_stand: "",
+    lokasi: "",
+  });
+  const [disable, setDisable] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (form.nama_stand === "" || form.lokasi === "") {
+      setDisable(true);
+    } else {
+      setDisable(false);
+    }
+  }, [form]);
+
+  const addUser = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post(`${url}/api/stand`, form);
+      form.nama_stand = "";
+      form.lokasi = "";
+      const data = response.data.data.datas;
+      console.log(data);
+      onAdd(data);
+    } catch (error) {
+      console.error("Failed add user", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addUser();
+  };
+
+  const lastKdStand = stand[stand.length - 1]?.kd_stand || "STD-260218-000";
+  useEffect(() => {
+    const generateKdJenis = () => {
+      const splitCode = lastKdStand.split("-");
+      const lastNumber = parseInt(splitCode[2]);
+      const newNumber = lastNumber + 1;
+
+      if (newNumber < 10) {
+        setForm((prev) => ({
+          ...prev,
+          kd_stand: `STD-${splitCode[1]}-000${newNumber}`,
+        }));
+      } else if (newNumber < 100) {
+        setForm((prev) => ({
+          ...prev,
+          kd_stand: `STD-${splitCode[1]}-00${newNumber}`,
+        }));
+      } else if (newNumber < 1000) {
+        setForm((prev) => ({
+          ...prev,
+          kd_stand: `STD-${splitCode[1]}-0${newNumber}`,
+        }));
+      }
+    };
+
+    generateKdJenis();
+  }, [lastKdStand]);
+
+  return (
+    <>
+      <div>
+        <h1 className="text-lg font-semibold text-[#2f524a]">Kelola User</h1>
+        <p className="text-sm text-[#2f524a]/70">
+          Tambah atau atur akun pengguna sistem
+        </p>
+      </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 mt-4 gap-2">
+        <div className={fieldCls}>
+          <div className="flex justify-between">
+            <label className={labelCls}>ID</label>
+            <p className="text-sm opacity-50">*ID digenerate otomatis.</p>
+          </div>
+          <input
+            type="text"
+            name="kd_stand"
+            value={form.kd_stand}
+            onChange={handleChange}
+            disabled={true}
+            className={`${inputCls} text-[#2f524a]/70`}
+          />
+        </div>
+        <div className={fieldCls}>
+          <label className={labelCls}>Nama stand</label>
+          <input
+            type="text"
+            name="nama_stand"
+            value={form.nama_stand}
+            onChange={handleChange}
+            placeholder="cth: biru"
+            className={inputCls}
+          />
+        </div>
+        <div className={fieldCls}>
+          <label className={labelCls}>Lokasi</label>
+          <input
+            type="text"
+            name="lokasi"
+            value={form.lokasi}
+            onChange={handleChange}
+            placeholder="cth: JL. Betet Bawang, GG. Martha."
+            className={inputCls}
+          />
         </div>
         {loading ? (
           <button
@@ -521,6 +726,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   const [menus, setMenus] = useState<MenuTableProps[]>([]);
   const [jenisList, setJenisList] = useState<JenisForm[]>([]);
   const [userList, setUserList] = useState<UserForm[]>([]);
+  const [standList, setStandList] = useState<StandForm[]>([]);
 
   const fetchMenuData = async () => {
     try {
@@ -552,6 +758,16 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
     }
   };
 
+  const fetchStandData = async () => {
+    try {
+      const response = await axios.get(`${url}/api/stand`);
+      const data = await response.data.data;
+      setStandList(data.datas.data);
+    } catch (error) {
+      console.error("Error fetching Stand data:", error);
+    }
+  };
+
   // menu
 
   const [successDeleteMenu, setSuccessDeleteMenu] = useState<boolean>(false);
@@ -561,6 +777,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
     fetchJenisData();
     fetchMenuData();
     fetchUserData();
+    fetchStandData();
   }, []);
 
   const handleAddMenu = (newMenu: MenuTableProps) => {
@@ -626,6 +843,28 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
     }, 5000);
   };
 
+  // Stand
+  const [successDeleteStand, setSuccessDeleteStand] = useState<boolean>(false);
+  const [successCreateStand, setSuccessCreateStand] = useState<boolean>(false);
+
+  const handleAddStand = (newStand: StandForm) => {
+    setStandList((prev) => [...prev, newStand]);
+    setSuccessCreateStand(true);
+    console.log("Stand:", newStand);
+    setTimeout(() => {
+      setSuccessCreateStand(false);
+    }, 5000);
+  };
+
+  const handleDeleteStand = async (id: number) => {
+    await axios.delete(`${url}/api/stand/${id}`);
+    await fetchStandData();
+    setSuccessDeleteStand(true);
+    setTimeout(() => {
+      setSuccessDeleteStand(false);
+    }, 5000);
+  };
+
   const renderForm = () => {
     switch (activeTabState) {
       case "menu":
@@ -639,7 +878,11 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
       case "jenis":
         return <FormJenis jenis={jenisList || []} onAdd={handleAddjenis} />;
       case "user":
-        return <FormUser user={userList} onAdd={handleAddUser} />;
+        return (
+          <FormUser user={userList} stand={standList} onAdd={handleAddUser} />
+        );
+      case "stand":
+        return <FormStand stand={standList} onAdd={handleAddStand} />;
       default:
         return null;
     }
@@ -747,15 +990,50 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
           }
         />
       )}
+      {/* Alert Stand */}
+      {successDeleteStand && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleCheck size={20} className="text-[#119184]" />
+              <div className="text-[#119184]">
+                <h2 className="text-sm font-bold">
+                  Stand deleted successfully!
+                </h2>
+                <p className="text-sm">
+                  Stand has been deleted from the system.
+                </p>
+              </div>
+            </div>
+          }
+        />
+      )}
+      {successCreateStand && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleCheck size={20} className="text-[#119184]" />
+              <div className="text-[#119184]">
+                <h2 className="text-sm font-bold">
+                  Stand created successfully!
+                </h2>
+                <p className="text-sm">Stand has been created in the system.</p>
+              </div>
+            </div>
+          }
+        />
+      )}
       {renderForm()}
       <TableList
         activeTab={activeTabState}
         data={menus}
         jenis={jenisList}
         user={userList}
+        stand={standList}
         onDeleteMenus={handleDeleteMenu}
         onDeleteJenis={handleDeleteJenis}
         onDeleteUser={handleDeleteUser}
+        onDeleteStand={handleDeleteStand}
       />
     </>
   );
