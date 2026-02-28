@@ -9,6 +9,7 @@ interface Filters {
 }
 
 interface MenuTableProps {
+  id: number;
   kd_menu: string;
   jenis_id: string;
   nama_menu: string;
@@ -20,6 +21,7 @@ interface MenuTableProps {
 }
 
 interface JenisTableProps {
+  id: number;
   kd_jenis: string;
   nama_jenis: string;
 }
@@ -142,7 +144,7 @@ const ListMenu = ({
                       </button>
                       <button
                         className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition"
-                        onClick={() => onDelete(data.kd_menu)}
+                        onClick={() => onDelete(data.id)}
                       >
                         <Trash size={16} className="text-[#f44336]" />
                       </button>
@@ -196,7 +198,7 @@ const ListJenis = ({
                       <Trash
                         size={16}
                         className="text-[#f44336]"
-                        onClick={() => onDelete(data.kd_jenis)}
+                        onClick={() => onDelete(data.id)}
                       />
                     </button>
                   </td>
@@ -372,10 +374,11 @@ const ListStand = ({
             <table className="w-full text-left gap-2">
               <thead>
                 <tr className="border-b border-[#119184]/20 text-sm text-[#2f524a] font-semibold">
-                  <th className="p-4 w-1/6">kd_stand</th>
-                  <th className="p-4 w-1/6">Nama</th>
-                  <th className="p-4 w-1/6">lokasi</th>
-                  <th className="p-4 w-1/6">Aksi</th>
+                  <th className="p-4 w-1/5">ID </th>
+                  <th className="p-4 w-1/5">kd_stand</th>
+                  <th className="p-4 w-1/5">Nama</th>
+                  <th className="p-4 w-1/5">lokasi</th>
+                  <th className="p-4 w-1/5">Aksi</th>
                 </tr>
               </thead>
               <tbody className=" text-md font-semibold text-[#2f524a]">

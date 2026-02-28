@@ -15,6 +15,7 @@ body {
 @theme {
   --animate-showIn: showIn 1s ease;
   --animate-showOut: showOut 1s ease;
+  --animate-scaleIn: scaleIn 0.3s ease;
   @keyframes showIn {
     0% {
       opacity: 0;
@@ -50,6 +51,25 @@ body {
       -moz-transform: translateY(40px);
       -ms-transform: translateY(40px);
       -o-transform: translateY(40px);
+    }
+  }
+
+  @keyframes scaleIn {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+      -webkit-transform: scale(0);
+      -moz-transform: scale(0);
+      -ms-transform: scale(0);
+      -o-transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+      -webkit-transform: scale(1);
+      -moz-transform: scale(1);
+      -ms-transform: scale(1);
+      -o-transform: scale(1);
     }
   }
 }

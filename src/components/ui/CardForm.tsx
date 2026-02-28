@@ -9,6 +9,7 @@ const url: string = import.meta.env.VITE_BASE_URL;
 type TabType = "menu" | "jenis" | "stand" | "user";
 
 interface MenuForm {
+  id: number;
   kd_menu: string;
   nama_menu: string;
   jenis_id: string;
@@ -17,6 +18,7 @@ interface MenuForm {
 }
 
 interface JenisForm {
+  id: number;
   kd_jenis: string;
   nama_jenis: string;
 }
@@ -44,6 +46,7 @@ interface StandForm {
 // fetch props
 
 interface MenuTableProps {
+  id: number;
   kd_menu: string;
   jenis_id: string;
   nama_menu: string;
@@ -69,6 +72,7 @@ const FormMenu = ({
   onAdd: (newMenu: MenuTableProps) => void;
 }) => {
   const [form, setForm] = useState<MenuForm>({
+    id: 0,
     kd_menu: "",
     nama_menu: "",
     jenis_id: "",
@@ -256,6 +260,7 @@ const FormJenis = ({
   onAdd: (newJenis: JenisForm) => void;
 }) => {
   const [form, setForm] = useState<JenisForm>({
+    id: 0,
     kd_jenis: "JNS-260218-003",
     nama_jenis: "",
   });
@@ -393,7 +398,7 @@ const FormUser = ({
   onAdd: (newUser: UserForm) => void;
 }) => {
   const [form, setForm] = useState<UserForm>({
-    id: 1,
+    id: 0,
     name: "",
     email: "",
     password: "",
@@ -604,7 +609,6 @@ const FormStand = ({
       form.nama_stand = "";
       form.lokasi = "";
       const data = response.data.data.datas;
-      console.log(data);
       onAdd(data);
     } catch (error) {
       console.error("Failed add user", error);

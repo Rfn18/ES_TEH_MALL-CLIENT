@@ -24,9 +24,15 @@ export const Header = ({ openParameter }: { openParameter: boolean }) => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <h2 className="bg-[#119184]/10 text-sm text-[#2f524a] font-semibold py-1 px-4 rounded-2xl">
-          TUTUP
-        </h2>
+        {open ? (
+          <h2 className="bg-green-600 text-sm text-white font-semibold py-1 px-6 rounded-2xl transition">
+            BUKA
+          </h2>
+        ) : (
+          <h2 className="bg-[#119184]/10 text-sm text-[#2f524a] font-semibold py-1 px-4 rounded-2xl transition">
+            TUTUP
+          </h2>
+        )}
         <div className="flex items-center justify-center rounded-3xl w-10 h-10 bg-[#119184]/10 cursor-pointer hover:bg-[#119184]/20 transition">
           <div
             className="w-full h-full flex items-center justify-center"

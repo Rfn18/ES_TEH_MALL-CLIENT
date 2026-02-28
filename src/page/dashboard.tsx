@@ -1,12 +1,16 @@
 import {
   Banknote,
   Calculator,
+  CirclePlus,
+  CircleX,
   Package,
   Play,
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
 import { Header } from "../components/ui/Header";
+import { useState } from "react";
+import Alert from "../components/ui/Alert";
 
 interface cardProps {
   title: string;
@@ -16,6 +20,16 @@ interface cardProps {
 }
 
 export const UserDashboard = () => {
+  const [open, setOpen] = useState(false);
+  const [alert, setAlert] = useState(false);
+  const createTransaction = () => {
+    setOpen(true);
+  };
+
+  const closeTransaction = () => {
+    setAlert(true);
+  };
+
   const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
     return (
       <div className="flex justify-between p-6 w-full bg-white border border-[#119184]/20 rounded-2xl hover:shadow-sm transition">
@@ -31,7 +45,15 @@ export const UserDashboard = () => {
 
   return (
     <div className="w-full px-16 py-8">
-      <Header openParameter={true} />
+      {alert && (
+        <Alert
+          cancel={() => setAlert(!alert)}
+          confirm={() => {
+            (setOpen(!open), setAlert(!alert));
+          }}
+        />
+      )}
+      <Header openParameter={open} />
       <div className="flex gap-4 mt-10">
         <CalculateCard
           title="Omzet Hari Ini"
@@ -79,9 +101,26 @@ export const UserDashboard = () => {
           <h1 className="font-semibold text-[#2f524a] text-xl">
             Start Transactions
           </h1>
-          <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl">
-            <Play size={20} /> Mulai Transaksi Hari Ini
-          </button>
+          {open ? (
+            <div className="flex gap-4">
+              <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl ">
+                <CirclePlus size={20} /> Catat Menu
+              </button>
+              <button
+                onClick={closeTransaction}
+                className="flex items-center gap-4 border border-[#FF4400] text-[#FF4400] hover:bg-[#FF4400]/10 cursor-pointer transitio font-semibold mt-4 py-4 px-8 rounded-xl  "
+              >
+                <CircleX size={20} /> Tutup Transaksi
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={createTransaction}
+              className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl"
+            >
+              <Play size={20} /> Mulai Transaksi Hari Ini
+            </button>
+          )}
         </div>
       </div>
       <div className="flex flex-col p-6 w-full bg-white border border-[#119184]/20 rounded-2xl mt-8">
