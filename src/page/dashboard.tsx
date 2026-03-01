@@ -129,31 +129,75 @@ export const UserDashboard = () => {
             <Package size={20} /> Tambah Menu
           </h1>
         </div>
-        {/* <div className="relative overflow-x-auto border border-[#119184]/20  rounded-xl mt-8">
-          <table className="w-full text-[#2f524a] ">
-            <thead className="font-semibold text-sm text-left p-2 bg-neutral-100  border-b border-[#119184]/20 ">
+        <div className="relative w-full overflow-x-auto border border-[#119184]/20 rounded-xl mt-8">
+          <table className="table-fixed min-w-7xl text-[#2f524a]">
+            <thead className="font-semibold text-sm text-left bg-neutral-100 border-b border-[#119184]/20">
               <tr>
-                <th className="px-6 py-3">KD-Menu</th>
-                <th>Nama</th>
-                <th>Jenis</th>
-                <th>Harga</th>
+                <th className="px-4 py-3 w-28">#</th>
+                <th className="px-4 py-3 w-28">Nama</th>
+                <th className="px-4 py-3 w-28">Jenis</th>
+                <th className="px-4 py-3 w-28 text-right">Harga Jual</th>
+                <th className="px-4 py-3 w-28 text-right">HPP</th>
+                <th className="px-4 py-3 w-28 text-center">Stok Awal</th>
+                <th className="px-4 py-3 w-28 text-center">Sisa Stok</th>
+                <th className="px-4 py-3 w-28 text-center">Laku</th>
+                <th className="px-4 py-3 w-28 text-center">Omzet</th>
+                <th className="px-4 py-3 w-28 text-center">HPP Total</th>
               </tr>
             </thead>
-            <tbody className="font-semibold text-sm text-left p-2  ">
-              <tr className="border-b border-[#119184]/20 text-heading whitespace-nowrap">
-                <td className="px-6 py-3">MNU-270326-1</td>
-                <td>Es Teh</td>
-                <td>Cup Jumbo</td>
-                <td>Rp. 3000</td>
+
+            <tbody className="font-semibold text-sm">
+              <tr className="border-b border-[#119184]/20 whitespace-nowrap">
+                <td className="px-4 py-3">1</td>
+                <td className="px-4 py-3">Es Teh</td>
+                <td className="px-4 py-3">Cup Jumbo</td>
+                <td className="px-4 py-3 text-right">Rp.3000</td>
+                <td className="px-4 py-3 text-right">
+                  <input
+                    type="number"
+                    className="w-full py-2 px-4 text-right focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                  />
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                  />
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                  />
+                </td>
+                <td className="px-4 py-3 text-center">-</td>
+                <td className="px-4 py-3 text-center">-</td>
+                <td className="px-4 py-3 text-center">-</td>
               </tr>
             </tbody>
+            <tfoot className="table-fixed min-w-7xl text-[#2f524a] bg-neutral-100">
+              <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th className="px-4 py-3 w-28">Total</th>
+                <th className="px-4 py-3 w-28">-</th>
+                <th className="px-4 py-3 w-28">-</th>
+                <th className="px-4 py-3 w-28">-</th>
+              </tr>
+            </tfoot>
           </table>
-        </div> */}
-        <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
+        </div>
+        {/* <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
           <Package size={50} />
           <h1 className="font-semibold mt-4">Belum ada list menu</h1>
           <p className="text-sm">Tambahkan menu untuk melihat list menu.</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
