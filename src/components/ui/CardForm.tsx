@@ -15,7 +15,7 @@ interface MenuForm {
   jenis_id: string;
   harga_satuan: number;
   biaya_produksi: number;
-}
+} 
 
 interface JenisForm {
   id: number;

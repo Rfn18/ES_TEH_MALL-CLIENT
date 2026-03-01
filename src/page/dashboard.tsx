@@ -3,14 +3,17 @@ import {
   Calculator,
   CirclePlus,
   CircleX,
+  Lock,
   Package,
   Play,
+  Save,
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
 import { Header } from "../components/ui/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Alert from "../components/ui/Alert";
+import axios from "axios";
 
 interface cardProps {
   title: string;
@@ -19,9 +22,22 @@ interface cardProps {
   icon: any;
 }
 
+interface MenuForm {
+  id: number;
+  kd_menu: string;
+  nama_menu: string;
+  jenis_id: string;
+  harga_satuan: number;
+  biaya_produksi: number;
+}
+
 export const UserDashboard = () => {
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(false);
+  const [menuList, setMenuList] = useState<MenuForm[]>([]);
+
+  const url = import.meta.env.VITE_BASE_URL;
+
   const createTransaction = () => {
     setOpen(true);
   };
@@ -29,6 +45,20 @@ export const UserDashboard = () => {
   const closeTransaction = () => {
     setAlert(true);
   };
+
+  useEffect(() => {
+    const fecthingMenu = async () => {
+      try {
+        const response = await axios.get(`${url}/api/menu`);
+        const datas = response.data.data.datas;
+        console.log(datas);
+      } catch (error) {
+        console.error("Failed fetching data", error);
+      }
+    };
+
+    fecthingMenu();
+  }, []);
 
   const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
     return (
@@ -193,11 +223,22 @@ export const UserDashboard = () => {
             </tfoot>
           </table>
         </div>
+
         {/* <div className="self-center flex flex-col h-60 items-center justify-center text-[#2f524a]/70  ">
           <Package size={50} />
           <h1 className="font-semibold mt-4">Belum ada list menu</h1>
           <p className="text-sm">Tambahkan menu untuk melihat list menu.</p>
         </div> */}
+      </div>
+      <div className="flex items-center justify-end gap-2 my-4">
+        <button className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white">
+          <Save size={18} />
+          Simpan Transaksi
+        </button>
+        <button className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#FF4400] hover:bg-[#FF4400]/80 cursor-pointer transition text-white">
+          <Lock size={18} />
+          Tutup Transaksi
+        </button>
       </div>
     </div>
   );
