@@ -1,6 +1,16 @@
-export const ToRupiah = (number: number): string => {
+const toRupiah = (value: number): string => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-  }).format(number);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
 };
+const toRupiahNoRp = (value: number): string => {
+  return new Intl.NumberFormat("id-ID", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+export { toRupiah, toRupiahNoRp };

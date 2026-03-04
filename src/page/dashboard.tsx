@@ -1,8 +1,10 @@
 import {
   Banknote,
   Calculator,
+  CircleCheck,
   CirclePlus,
   CircleX,
+  Footprints,
   Lock,
   Package,
   Play,
@@ -14,13 +16,9 @@ import { Header } from "../components/ui/Header";
 import { useEffect, useState } from "react";
 import Alert from "../components/ui/Alert";
 import axios from "axios";
-
-interface cardProps {
-  title: string;
-  point: string;
-  desc: string;
-  icon: any;
-}
+import { toRupiah, toRupiahNoRp } from "../utils/ToRupiah";
+import { CalculateCard } from "../components/ui/CalculateCard";
+import { Toast } from "../components/ui/Toast";
 
 interface MenuForm {
   id: number;
@@ -29,12 +27,29 @@ interface MenuForm {
   jenis_id: string;
   harga_satuan: number;
   biaya_produksi: number;
+  jenis: { nama_jenis: string };
+}
+
+interface DetailProps {
+  jual_id: string;
+  menu_id: string;
+  jumlah: number;
+  sisa: number;
 }
 
 export const UserDashboard = () => {
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(false);
+  const [successSaveAlert, setSuccessSaveALert] = useState(false);
   const [menuList, setMenuList] = useState<MenuForm[]>([]);
+  const [form, setForm] = useState<DetailProps[]>([
+    {
+      jual_id: "",
+      menu_id: "",
+      jumlah: 0,
+      sisa: 0,
+    },
+  ]);
 
   const url = import.meta.env.VITE_BASE_URL;
 
@@ -51,7 +66,7 @@ export const UserDashboard = () => {
       try {
         const response = await axios.get(`${url}/api/menu`);
         const datas = response.data.data.datas;
-        console.log(datas);
+        setMenuList(datas.data);
       } catch (error) {
         console.error("Failed fetching data", error);
       }
@@ -60,21 +75,101 @@ export const UserDashboard = () => {
     fecthingMenu();
   }, []);
 
-  const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
-    return (
-      <div className="flex justify-between p-6 w-full bg-white border border-[#119184]/20 rounded-2xl hover:shadow-sm transition">
-        <div className="flex flex-col gap-2 text-[#2f524a]">
-          <p className="opacity-70 font-semibold">{title}</p>
-          <h1 className="text-3xl font-bold">{point}</h1>
-          <p className="text-sm opacity-70">{desc}</p>
-        </div>
-        {icon}
-      </div>
+  const handleChange = (
+    index: number,
+    field: keyof DetailProps,
+    value: string | number,
+  ) => {
+    setForm((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
+  };
+
+  useEffect(() => {
+    const transaction: any = localStorage.getItem("transaction");
+
+    if (transaction) {
+      const itemStr = JSON.parse(transaction);
+      const value = JSON.parse(itemStr?.value);
+      if (itemStr.expiry < Date.now()) {
+        localStorage.removeItem("transaction");
+      }
+      setForm(value);
+    } else if (menuList.length > 0) {
+      setForm(
+        menuList.map((menu) => ({
+          jual_id: "",
+          menu_id: menu.kd_menu,
+          jumlah: 0,
+          sisa: 0,
+        })),
+      );
+    }
+  }, [menuList]);
+
+  const formMapping = (params: string) => {
+    const label = params === "jumlah" ? "jumlah" : "sisa";
+    return form.reduce((acc, item) => acc + item[label], 0);
+  };
+
+  const sumLaku =
+    formMapping("jumlah") && formMapping("sisa")
+      ? formMapping("jumlah") - formMapping("sisa")
+      : "-";
+
+  const laku = (index: number) => {
+    return form[index]?.jumlah - form[index]?.sisa;
+  };
+
+  const totalOmzet = form.reduce((acc, item, index) => {
+    if (item.jumlah === 0 || item.sisa === 0) {
+      return acc;
+    }
+
+    const jumlahLaku = laku(index);
+    return acc + jumlahLaku * menuList[index]?.harga_satuan;
+  }, 0);
+
+  const totalHPP = form.reduce((acc, item, index) => {
+    if (item.jumlah === 0 || item.sisa === 0) {
+      return acc;
+    }
+
+    const jumlahLaku = laku(index);
+    return acc + jumlahLaku * menuList[index]?.biaya_produksi;
+  }, 0);
+
+  const saveTransaction = () => {
+    const now = new Date();
+    const item = {
+      value: JSON.stringify(form),
+      expiry: now.getTime() + 24 * 60 * 60 * 1000,
+    };
+
+    localStorage.setItem("transaction", JSON.stringify(item));
+    setSuccessSaveALert(true);
+    setTimeout(() => {
+      setSuccessSaveALert(false);
+    }, 5000);
   };
 
   return (
     <div className="w-full px-16 py-8">
+      {successSaveAlert && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleCheck size={20} className="text-[#119184]" />
+              <div className="text-[#119184]">
+                <h2 className="text-sm font-bold">
+                  Transaksi berhasil disimpan!
+                </h2>
+                <p className="text-sm">Data stok dan penjualan tersimpan.</p>
+              </div>
+            </div>
+          }
+        />
+      )}
       {alert && (
         <Alert
           cancel={() => setAlert(!alert)}
@@ -87,7 +182,7 @@ export const UserDashboard = () => {
       <div className="flex gap-4 mt-10">
         <CalculateCard
           title="Omzet Hari Ini"
-          point={`Rp. ${2}`}
+          point={toRupiah(totalOmzet)}
           desc="Total pendapatan kotor"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#119184]/10 self-start">
@@ -97,7 +192,7 @@ export const UserDashboard = () => {
         />
         <CalculateCard
           title="Item Terjual"
-          point={`2`}
+          point={`${sumLaku}`}
           desc="Total produk terjual"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#35ad61]/10 self-start">
@@ -107,7 +202,7 @@ export const UserDashboard = () => {
         />
         <CalculateCard
           title="Laba Bersih"
-          point={`Rp. ${2}`}
+          point={toRupiah(totalOmzet - totalHPP)}
           desc="Estimasi keuntungan"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#2daa5a]/10 self-start">
@@ -117,7 +212,7 @@ export const UserDashboard = () => {
         />
         <CalculateCard
           title="HPP (Biaya)"
-          point={`Rp. ${2}`}
+          point={toRupiah(totalHPP)}
           desc="Total harga pokok"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#f7b441]/10 self-start">
@@ -126,33 +221,23 @@ export const UserDashboard = () => {
           }
         />
       </div>
-      <div className="flex gap-4 mt-8">
-        <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
-          <h1 className="font-semibold text-[#2f524a] text-xl">
-            Start Transactions
-          </h1>
-          {open ? (
-            <div className="flex gap-4">
-              <button className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl ">
-                <CirclePlus size={20} /> Catat Menu
-              </button>
-              <button
-                onClick={closeTransaction}
-                className="flex items-center gap-4 border border-[#FF4400] text-[#FF4400] hover:bg-[#FF4400]/10 cursor-pointer transitio font-semibold mt-4 py-4 px-8 rounded-xl  "
-              >
-                <CircleX size={20} /> Tutup Transaksi
-              </button>
-            </div>
-          ) : (
+      {open ? (
+        ""
+      ) : (
+        <div className="flex gap-4 mt-8">
+          <div className="p-6 w-full bg-white border border-[#119184]/20 rounded-2xl">
+            <h1 className="font-semibold text-[#2f524a] text-xl">
+              Start Transactions
+            </h1>
             <button
               onClick={createTransaction}
               className="flex items-center gap-4 bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white font-semibold mt-4 py-4 px-8 rounded-xl"
             >
               <Play size={20} /> Mulai Transaksi Hari Ini
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
       <div className="flex flex-col p-6 w-full bg-white border border-[#119184]/20 rounded-2xl mt-8">
         <div>
           <h1 className="flex items-center gap-2 font-semibold text-[#2f524a] text-xl">
@@ -175,37 +260,66 @@ export const UserDashboard = () => {
                 <th className="px-4 py-3 w-28 text-center">HPP Total</th>
               </tr>
             </thead>
-
             <tbody className="font-semibold text-sm">
-              <tr className="border-b border-[#119184]/20 whitespace-nowrap">
-                <td className="px-4 py-3">1</td>
-                <td className="px-4 py-3">Es Teh</td>
-                <td className="px-4 py-3">Cup Jumbo</td>
-                <td className="px-4 py-3 text-right">Rp.3000</td>
-                <td className="px-4 py-3 text-right">
-                  <input
-                    type="number"
-                    className="w-full py-2 px-4 text-right focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
-                  />
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <input
-                    type="number"
-                    placeholder="0"
-                    className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
-                  />
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <input
-                    type="number"
-                    placeholder="0"
-                    className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
-                  />
-                </td>
-                <td className="px-4 py-3 text-center">-</td>
-                <td className="px-4 py-3 text-center">-</td>
-                <td className="px-4 py-3 text-center">-</td>
-              </tr>
+              {menuList.map((data, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-[#119184]/20 whitespace-nowrap"
+                >
+                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3">{data.nama_menu}</td>
+                  <td className="px-4 py-3">{data.jenis.nama_jenis}</td>
+                  <td className="px-4 py-3 text-right">
+                    {toRupiah(data.harga_satuan)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <input
+                      type="number"
+                      value={toRupiahNoRp(data.biaya_produksi)}
+                      className="w-full py-2 px-4 text-right focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <input
+                      type="number"
+                      name="jumlah"
+                      value={form[index]?.jumlah || ""}
+                      onChange={(e) =>
+                        handleChange(index, "jumlah", Number(e.target.value))
+                      }
+                      placeholder="0"
+                      className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <input
+                      type="number"
+                      name="sisa"
+                      value={form[index]?.sisa || ""}
+                      onChange={(e) =>
+                        handleChange(index, "sisa", Number(e.target.value))
+                      }
+                      placeholder="0"
+                      className="w-20 py-2 px-4 text-center focus:outline-2 focus:outline-offset-2 focus:outline-[#3b3b3b] focus:border-[#3b3b3b] text-sm border border-[#ddd] rounded-xl"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {form[index]?.jumlah === 0 || form[index]?.sisa === 0
+                      ? "-"
+                      : laku(index)}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {form[index]?.jumlah === 0 || form[index]?.sisa === 0
+                      ? "-"
+                      : toRupiah(laku(index) * data.harga_satuan)}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {form[index]?.jumlah === 0 || form[index]?.sisa === 0
+                      ? "-"
+                      : toRupiah(laku(index) * data.biaya_produksi)}
+                  </td>
+                </tr>
+              ))}
             </tbody>
             <tfoot className="table-fixed min-w-7xl text-[#2f524a] bg-neutral-100">
               <tr>
@@ -216,9 +330,13 @@ export const UserDashboard = () => {
                 <th></th>
                 <th></th>
                 <th className="px-4 py-3 w-28">Total</th>
-                <th className="px-4 py-3 w-28">-</th>
-                <th className="px-4 py-3 w-28">-</th>
-                <th className="px-4 py-3 w-28">-</th>
+                <th className="px-4 py-3 w-28">{sumLaku}</th>
+                <th className="px-4 py-3 w-28">
+                  {totalOmzet ? toRupiah(totalOmzet) : "-"}
+                </th>
+                <th className="px-4 py-3 w-28">
+                  {totalHPP ? toRupiah(totalHPP) : "-"}
+                </th>
               </tr>
             </tfoot>
           </table>
@@ -231,11 +349,17 @@ export const UserDashboard = () => {
         </div> */}
       </div>
       <div className="flex items-center justify-end gap-2 my-4">
-        <button className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white">
+        <button
+          onClick={() => saveTransaction()}
+          className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#119184] hover:bg-[#119184]/80 cursor-pointer transition text-white"
+        >
           <Save size={18} />
           Simpan Transaksi
         </button>
-        <button className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#FF4400] hover:bg-[#FF4400]/80 cursor-pointer transition text-white">
+        <button
+          onClick={() => closeTransaction()}
+          className="flex items-center justify-center py-2 px-4 rounded-xl gap-2 text-md font-semibold bg-[#FF4400] hover:bg-[#FF4400]/80 cursor-pointer transition text-white"
+        >
           <Lock size={18} />
           Tutup Transaksi
         </button>

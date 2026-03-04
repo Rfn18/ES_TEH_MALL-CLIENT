@@ -108,7 +108,6 @@ const FormMenu = ({
     try {
       setLoading(true);
       const res = await axios.post(`${url}/api/menu`, form);
-      console.log("Add menu response:", res.data.data.datas);
       const newResponse = res.data.data.datas;
       onAdd(newResponse);
     } catch (error) {
@@ -121,7 +120,6 @@ const FormMenu = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     addMenu();
-    console.log("Submit Menu:", form);
   };
 
   const lastKdMenu =

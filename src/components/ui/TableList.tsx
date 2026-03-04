@@ -1,7 +1,7 @@
 import { Package, Pencil, Search, Store, Trash, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { TabType } from "../../page/admin/dashboard";
-import { ToRupiah } from "../../utils/ToRupiah";
+import { toRupiah } from "../../utils/ToRupiah";
 
 interface Filters {
   searchTerm: string;
@@ -136,8 +136,8 @@ const ListMenu = ({
                     <td className="p-4">{data.kd_menu}</td>
                     <td className="p-4">{data.nama_menu}</td>
                     <td className="p-4">{data.jenis.nama_jenis}</td>
-                    <td className="p-4">{ToRupiah(data.biaya_produksi)}</td>
-                    <td className="p-4">{ToRupiah(data.harga_satuan)}</td>
+                    <td className="p-4">{toRupiah(data.biaya_produksi)}</td>
+                    <td className="p-4">{toRupiah(data.harga_satuan)}</td>
                     <td className="p-4">
                       <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
                         <Pencil size={16} className="text-[#2f524a]" />
