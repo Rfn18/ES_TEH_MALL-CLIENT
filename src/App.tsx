@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import { Login } from "./page/login";
+import { Login } from "./page/auth/login";
 import "./App.css";
-import { Register } from "./page/register";
+import { Register } from "./page/auth/register";
 import { Dashboard } from "./page/admin/dashboard";
-import { UserDashboard } from "./page/dashboard";
+import { UserDashboard } from "./page/kasir/dashboard";
 import NotFound from "./page/NotFound";
 
 const App = () => (

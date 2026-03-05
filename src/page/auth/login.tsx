@@ -4,20 +4,20 @@ import {
   EyeClosed,
   LoaderCircle,
   Lock,
-  User,
+  Mail,
 } from "lucide-react";
-import { AuthCard } from "../components/auth/AuthCard";
+import { AuthCard } from "../../components/auth/AuthCard";
 import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { Toast } from "../components/ui/Toast";
+import { Toast } from "../../components/ui/Toast";
 
 export const Login = () => {
   const [showPw, setShowPw] = useState<boolean>(false);
   const [data, setData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
-  const [alert, setAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -99,13 +99,13 @@ export const Login = () => {
       <div className="flex flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col gap-2 my-4">
           <label htmlFor="username" className="text-sm font-semibold">
-            Username
+            Email
           </label>
           <div className="flex items-center bg-[#f9fafb] w-full h-12 mb-2 border border-[#ddd] rounded-xl">
-            <User size="20" className="m-3 opacity-70" />
+            <Mail size="20" className="m-3 opacity-70" />
             <input
-              type="text"
-              name="username"
+              type="email"
+              name="email"
               placeholder="Enter Your Email"
               className="w-full h-full text-sm outline-none"
               onChange={handleChange}

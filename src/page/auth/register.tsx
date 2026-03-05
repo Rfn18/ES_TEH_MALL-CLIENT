@@ -1,29 +1,51 @@
-import { AuthCard } from "../components/auth/AuthCard";
-import { User, Lock, Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import axios from "axios";
+import { AuthCard } from "../../components/auth/AuthCard";
+import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  Mail,
+  Store,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+
+interface StandForm {
+  id: number;
+  kd_stand: string;
+  nama_stand: string;
+  lokasi: string;
+}
 
 export const Register = () => {
   const [showPw1, setShowPw1] = useState<Boolean>(false);
   const [showPw2, setShowPw2] = useState<Boolean>(false);
 
   const [loading, setLoading] = useState<Boolean>(false);
+  const [standList, setStandList] = useState<StandForm[]>([]);
+
+  const url = import.meta.env.VITE_BASE_URL;
 
   const navigate = useNavigate();
 
   const [data, setData] = useState({
-    username: "",
+    name: "",
+    email: "",
+    stand_id: "",
     password: "",
     password_confirmation: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ): void => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(JSON.stringify(data));
     try {
       setLoading(true);
       const response = await fetch("http://127.0.0.1:8000/api/register", {
@@ -47,6 +69,20 @@ export const Register = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchDataStand = async () => {
+      try {
+        const response = await axios.get(`${url}/api/stand`);
+        const data = response.data.data.datas.data;
+        setStandList(data);
+      } catch (error) {
+        console.error("Failed fetching data.", error);
+      }
+    };
+
+    fetchDataStand();
+  }, []);
+
   return (
     <AuthCard>
       <div className="w-full flex flex-col items-center gap-2">
@@ -62,11 +98,42 @@ export const Register = () => {
             <User size="20" className="m-3 opacity-70" />
             <input
               type="text"
-              name="username"
+              name="name"
               placeholder="Enter Your Full Name"
               className="w-full h-full text-sm outline-none"
               onChange={handleChange}
             />
+          </div>
+          <label htmlFor="username" className="text-sm font-semibold">
+            Email
+          </label>
+          <div className="flex items-center bg-[#f9fafb] w-full h-12 mb-2 border border-[#ddd] rounded-xl">
+            <Mail size="20" className="m-3 opacity-70" />
+            <input
+              type="text"
+              name="email"
+              placeholder="Enter Your Email"
+              className="w-full h-full text-sm outline-none"
+              onChange={handleChange}
+            />
+          </div>
+          <label htmlFor="username" className="text-sm font-semibold">
+            Stand
+          </label>
+          <div className="flex items-center bg-[#f9fafb] w-full h-12 mb-2 border border-[#ddd] rounded-xl">
+            <Store size="20" className="m-3 opacity-70" />
+            <select
+              className="w-full focus:outline-none mr-4 text-sm opacity-70"
+              name="stand_id"
+              onChange={handleChange}
+            >
+              <option value="">Pilih stand</option>
+              {standList.map((data, index) => (
+                <option className="w-full" key={index} value={data.kd_stand}>
+                  {data.nama_stand}
+                </option>
+              ))}
+            </select>
           </div>
           <label htmlFor="password" className="text-sm font-semibold">
             Password
