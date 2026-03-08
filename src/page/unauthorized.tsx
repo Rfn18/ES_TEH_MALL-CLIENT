@@ -1,10 +1,10 @@
-const NotFound = () => {
+const Unatuhorized = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
+        <h1 className="mb-4 text-4xl font-bold">401</h1>
         <p className="mb-4 text-xl text-muted-foreground">
-          Oops! Halaman Tidak Ditemukan
+          You are not authorized for this page
         </p>
         <a href="/" className="text-primary underline hover:text-primary/90">
           go to dashboard
@@ -14,4 +14,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default Unatuhorized;

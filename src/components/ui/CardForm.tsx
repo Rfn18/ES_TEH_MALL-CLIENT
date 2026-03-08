@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { TableList } from "./TableList";
 import { CircleCheck, Eye, EyeClosed, LoaderCircle, Lock } from "lucide-react";
-import axios from "axios";
 import { Toast } from "./Toast";
+import { EditJenis, EditMenu, EditStand, EditUser } from "./EditComponent";
+import api from "../../services/api";
 
 const url: string = import.meta.env.VITE_BASE_URL;
 
@@ -15,7 +16,7 @@ interface MenuForm {
   jenis_id: string;
   harga_satuan: number;
   biaya_produksi: number;
-} 
+}
 
 interface JenisForm {
   id: number;
@@ -107,7 +108,7 @@ const FormMenu = ({
   const addMenu = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(`${url}/api/menu`, form);
+      const res = await api.post(`/menu`, form);
       const newResponse = res.data.data.datas;
       onAdd(newResponse);
     } catch (error) {
@@ -276,7 +277,7 @@ const FormJenis = ({
   const addJenis = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(`${url}/api/jenis`, form);
+      const res = await  api.post(`/jenis`, form);
       form.nama_jenis = "";
       const newResponse = res.data.data.datas;
       onAdd(newResponse);
@@ -419,7 +420,7 @@ const FormUser = ({
   const addUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${url}/api/user`, form);
+      const response = await  api.post(`/user`, form);
       form.name = "";
       form.password = "";
       form.role = "";
@@ -603,7 +604,7 @@ const FormStand = ({
   const addUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${url}/api/stand`, form);
+      const response = await api.post(`/stand`, form);
       form.nama_stand = "";
       form.lokasi = "";
       const data = response.data.data.datas;
@@ -729,10 +730,31 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   const [jenisList, setJenisList] = useState<JenisForm[]>([]);
   const [userList, setUserList] = useState<UserForm[]>([]);
   const [standList, setStandList] = useState<StandForm[]>([]);
+  const [editingMenu, setEditingMenu] = useState<MenuTableProps | null>(null);
+  const [editingJenis, setEditingJenis] = useState<JenisForm | null>(null);
+  const [editingUser, setEditingUser] = useState<UserForm | null>(null);
+  const [editingStand, setEditingStand] = useState<StandForm | null>(null);
+
+  const handleEditMenuSuccess = async () => {
+    await fetchMenuData();
+    setEditingMenu(null);
+  };
+  const handleEditJenisSuccess = async () => {
+    await fetchJenisData();
+    setEditingJenis(null);
+  };
+  const handleEditUserSuccess = async () => {
+    await fetchUserData();
+    setEditingUser(null);
+  };
+  const handleEditStandSuccess = async () => {
+    await fetchStandData();
+    setEditingStand(null);
+  };
 
   const fetchMenuData = async () => {
     try {
-      const response = await axios.get(`${url}/api/menu`);
+      const response = await api.get(`/menu`);
       const data = await response.data.data;
       setMenus(data.datas.data);
     } catch (error) {
@@ -742,7 +764,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
 
   const fetchJenisData = async () => {
     try {
-      const response = await axios.get(`${url}/api/jenis`);
+      const response = await api.get(`/jenis`);
       const data = await response.data.data;
       setJenisList(data.datas.data);
     } catch (error) {
@@ -752,7 +774,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`${url}/api/user`);
+      const response = await api.get(`${url}/api/user`);
       const data = await response.data.data;
       setUserList(data.datas.data);
     } catch (error) {
@@ -762,7 +784,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
 
   const fetchStandData = async () => {
     try {
-      const response = await axios.get(`${url}/api/stand`);
+      const response = await api.get(`/stand`);
       const data = await response.data.data;
       setStandList(data.datas.data);
     } catch (error) {
@@ -791,7 +813,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   };
 
   const handleDeleteMenu = async (kd_menu: string) => {
-    await axios.delete(`${url}/api/menu/${kd_menu}`);
+    await api.delete(`/menu/${kd_menu}`);
     await fetchMenuData();
     setSuccessDeleteMenu(true);
     setTimeout(() => {
@@ -816,7 +838,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   };
 
   const handleDeleteJenis = async (kd_jenis: string) => {
-    await axios.delete(`${url}/api/jenis/${kd_jenis}`);
+    await api.delete(`/jenis/${kd_jenis}`);
     await fetchJenisData();
     setSuccessDeleteJenis(true);
     setTimeout(() => {
@@ -837,7 +859,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   };
 
   const handleDeleteUser = async (id: number) => {
-    await axios.delete(`${url}/api/user/${id}`);
+    await api.delete(`/user/${id}`);
     await fetchUserData();
     setSuccessDeleteUser(true);
     setTimeout(() => {
@@ -859,7 +881,7 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
   };
 
   const handleDeleteStand = async (id: number) => {
-    await axios.delete(`${url}/api/stand/${id}`);
+    await api.delete(`/stand/${id}`);
     await fetchStandData();
     setSuccessDeleteStand(true);
     setTimeout(() => {
@@ -1025,6 +1047,36 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
           }
         />
       )}
+      {editingMenu && (
+        <EditMenu
+          menu={editingMenu}
+          jenis={jenisList}
+          onClose={() => setEditingMenu(null)}
+          onSuccess={handleEditMenuSuccess}
+        />
+      )}
+      {editingJenis && (
+        <EditJenis
+          jenis={editingJenis}
+          onClose={() => setEditingJenis(null)}
+          onSuccess={handleEditJenisSuccess}
+        />
+      )}
+      {editingUser && (
+        <EditUser
+          user={editingUser}
+          stand={standList}
+          onClose={() => setEditingUser(null)}
+          onSuccess={handleEditUserSuccess}
+        />
+      )}
+      {editingStand && (
+        <EditStand
+          stand={editingStand}
+          onClose={() => setEditingStand(null)}
+          onSuccess={handleEditStandSuccess}
+        />
+      )}
       {renderForm()}
       <TableList
         activeTab={activeTabState}
@@ -1036,6 +1088,10 @@ export const CardForm = ({ activeTab }: { activeTab: TabType }) => {
         onDeleteJenis={handleDeleteJenis}
         onDeleteUser={handleDeleteUser}
         onDeleteStand={handleDeleteStand}
+        onEditMenu={setEditingMenu}
+        onEditJenis={setEditingJenis}
+        onEditUser={setEditingUser}
+        onEditStand={setEditingStand}
       />
     </>
   );

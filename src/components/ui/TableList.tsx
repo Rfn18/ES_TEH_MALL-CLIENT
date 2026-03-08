@@ -1,6 +1,5 @@
 import { Package, Pencil, Search, Store, Trash, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { TabType } from "../../page/admin/dashboard";
 import { toRupiah } from "../../utils/ToRupiah";
 
 interface Filters {
@@ -44,15 +43,18 @@ interface StandTableProps {
   nama_stand: string;
   lokasi: string;
 }
+type TabType = "menu" | "jenis" | "stand" | "user";
 
 const ListMenu = ({
   data,
   jenis,
   onDelete,
+  onEdit,
 }: {
   data: MenuTableProps[];
   jenis: JenisTableProps[];
   onDelete: (kd_menu: string) => void;
+  onEdit: (menu: MenuTableProps) => void;
 }) => {
   const [jenisList, setJenisList] = useState<JenisTableProps[]>([]);
   const [filters, setFilters] = useState<Filters>({
@@ -139,7 +141,10 @@ const ListMenu = ({
                     <td className="p-4">{toRupiah(data.biaya_produksi)}</td>
                     <td className="p-4">{toRupiah(data.harga_satuan)}</td>
                     <td className="p-4">
-                      <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                      <button
+                        className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition"
+                        onClick={() => onEdit(data)}
+                      >
                         <Pencil size={16} className="text-[#2f524a]" />
                       </button>
                       <button
@@ -163,9 +168,11 @@ const ListMenu = ({
 const ListJenis = ({
   jenis,
   onDelete,
+  onEdit,
 }: {
   jenis: JenisTableProps[];
   onDelete: (kd_jenis: string) => void;
+  onEdit: (jenis: JenisTableProps) => void;
 }) => {
   const [jenisList, setJenisList] = useState<JenisTableProps[]>([]);
 
@@ -191,7 +198,10 @@ const ListJenis = ({
                   <td className="p-4">{data.kd_jenis}</td>
                   <td className="p-4">{data.nama_jenis}</td>
                   <td className="p-4">
-                    <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                    <button
+                      className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition"
+                      onClick={() => onEdit(data)}
+                    >
                       <Pencil size={16} className="text-[#2f524a]" />
                     </button>
                     <button className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition">
@@ -215,9 +225,11 @@ const ListJenis = ({
 const ListUser = ({
   user,
   onDelete,
+  onEdit,
 }: {
   user: UserTableProps[];
   onDelete: (id: number) => void;
+  onEdit: (user: UserTableProps) => void;
 }) => {
   const [filters, setFilters] = useState<Filters>({
     searchTerm: "",
@@ -296,7 +308,10 @@ const ListUser = ({
                     <td className="p-4">{data.stand?.nama_stand}</td>
                     <td className="p-4">{data.role}</td>
                     <td className="p-4">
-                      <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                      <button
+                        className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition"
+                        onClick={() => onEdit(data)}
+                      >
                         <Pencil size={16} className="text-[#2f524a]" />
                       </button>
                       <button className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition">
@@ -321,9 +336,11 @@ const ListUser = ({
 const ListStand = ({
   stand,
   onDelete,
+  onEdit,
 }: {
   stand: StandTableProps[];
   onDelete: (id: number) => void;
+  onEdit: (stand: StandTableProps) => void;
 }) => {
   const [filters, setFilters] = useState<Filters>({
     searchTerm: "",
@@ -389,7 +406,10 @@ const ListStand = ({
                     <td className="p-4">{data.nama_stand}</td>
                     <td className="p-4">{data.lokasi}</td>
                     <td className="p-4">
-                      <button className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition">
+                      <button
+                        className="text-sm text-[#2f524a] px-2 py-2 cursor-pointer hover:bg-[#2f524a]/10 rounded transition"
+                        onClick={() => onEdit(data)}
+                      >
                         <Pencil size={16} className="text-[#2f524a]" />
                       </button>
                       <button className="text-sm text-[#f44336] px-2 py-2 ml-2 cursor-pointer hover:bg-[#f44336]/10 rounded transition">
@@ -421,6 +441,10 @@ export const TableList = ({
   onDeleteJenis,
   onDeleteUser,
   onDeleteStand,
+  onEditMenu,
+  onEditJenis,
+  onEditUser,
+  onEditStand,
 }: {
   activeTab: TabType;
   data?: MenuTableProps[];
@@ -431,6 +455,10 @@ export const TableList = ({
   onDeleteJenis: (kd_jenis: string) => void;
   onDeleteUser: (id: number) => void;
   onDeleteStand: (id: number) => void;
+  onEditMenu: (menu: MenuTableProps) => void;
+  onEditJenis: (jenis: JenisTableProps) => void;
+  onEditUser: (user: UserTableProps) => void;
+  onEditStand: (stand: StandTableProps) => void;
 }) => {
   const [activeTabState, setActiveTabState] = useState<TabType>("menu");
 
@@ -446,15 +474,34 @@ export const TableList = ({
             data={data || []}
             jenis={jenis || []}
             onDelete={onDeleteMenus}
+            onEdit={onEditMenu}
           />
         );
       case "jenis":
-        return <ListJenis jenis={jenis || []} onDelete={onDeleteJenis} />;
+        return (
+          <ListJenis
+            jenis={jenis || []}
+            onDelete={onDeleteJenis}
+            onEdit={onEditJenis}
+          />
+        );
       case "user":
-        return <ListUser user={user || []} onDelete={onDeleteUser} />;
+        return (
+          <ListUser
+            user={user || []}
+            onDelete={onDeleteUser}
+            onEdit={onEditUser}
+          />
+        );
       default:
       case "stand":
-        return <ListStand stand={stand || []} onDelete={onDeleteStand} />;
+        return (
+          <ListStand
+            stand={stand || []}
+            onDelete={onDeleteStand}
+            onEdit={onEditStand}
+          />
+        );
         return null;
     }
   };

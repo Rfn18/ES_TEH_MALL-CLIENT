@@ -3,7 +3,6 @@ import {
   Calculator,
   CircleCheck,
   LoaderCircle,
-  LoaderCircleIcon,
   Lock,
   Package,
   Play,
@@ -14,10 +13,10 @@ import {
 import { Header } from "../../components/ui/Header";
 import { useEffect, useState } from "react";
 import Alert from "../../components/ui/Alert";
-import axios from "axios";
 import { toRupiah, toRupiahNoRp } from "../../utils/ToRupiah";
 import { CalculateCard } from "../../components/ui/CalculateCard";
 import { Toast } from "../../components/ui/Toast";
+import api from "../../services/api";
 
 interface MenuForm {
   id: number;
@@ -36,12 +35,28 @@ interface DetailProps {
   sisa: number;
 }
 
+interface TransactionProps {
+  id: number;
+  no_transaksi: string;
+  stand_id: string;
+  user_id: number;
+  total_biaya_produksi: number;
+  total_omzet: number;
+  selisih: number;
+  tanggal: string;
+}
+
 export const UserDashboard = () => {
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successSaveAlert, setSuccessSaveALert] = useState(false);
+  const [successCreateAlert, setSuccessCreateAlert] = useState(false);
+  const [successCloseAlert, setSuccessCloseAlert] = useState(false);
   const [menuList, setMenuList] = useState<MenuForm[]>([]);
+  const [transactionList, setTransactionList] = useState<TransactionProps[]>(
+    [],
+  );
   const [form, setForm] = useState<DetailProps[]>([
     {
       jual_id: "",
@@ -51,7 +66,9 @@ export const UserDashboard = () => {
     },
   ]);
 
-  const url = import.meta.env.VITE_BASE_URL;
+  const transaction: any = localStorage.getItem("transaction");
+  const transactionID =
+    localStorage.getItem("jual_id") || transactionList[0]?.no_transaksi;
 
   const filteredForm = form.filter(
     (item) => !(item.jumlah === 0 && item.sisa === 0),
@@ -69,8 +86,8 @@ export const UserDashboard = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(
-        `${url}/api/jual`,
+      const res = await api.post(
+        `/jual`,
         { tanggal: formattedDate },
         {
           headers: {
@@ -79,11 +96,16 @@ export const UserDashboard = () => {
         },
       );
       const data = res.data.data.datas;
+      setTransactionList(data);
       localStorage.setItem("jual_id", data.no_transaksi);
       setOpen(true);
     } catch (error) {
       console.error("Failed create transaction.", error);
     } finally {
+      setSuccessCreateAlert(true);
+      setTimeout(() => {
+        setSuccessCreateAlert(false);
+      }, 5000);
       setLoading(false);
     }
   };
@@ -94,18 +116,22 @@ export const UserDashboard = () => {
     }
     try {
       setLoading(true);
-      await axios.post(`${url}/api/jual-detail`, filteredForm, {
+      await api.post("/jual-detail", filteredForm, {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
       });
 
-      setOpen(!open);
+      setOpen(false);
       setAlert(!alert);
     } catch (error) {
       console.error("failed created transaction.", error);
     } finally {
+      setSuccessCloseAlert(true);
+      setTimeout(() => {
+        setSuccessCloseAlert(false);
+      }, 5000);
       localStorage.removeItem("jual_id");
       setLoading(false);
     }
@@ -118,13 +144,17 @@ export const UserDashboard = () => {
   useEffect(() => {
     const fecthingMenu = async () => {
       try {
-        const response = await axios.get(`${url}/api/menu`);
+        const response = await api.get(`/menu`);
         const datas = response.data.data.datas;
         setMenuList(datas.data);
       } catch (error) {
         console.error("Failed fetching data", error);
       }
     };
+
+    if (transactionID) {
+      setOpen(true);
+    }
 
     fecthingMenu();
   }, []);
@@ -140,15 +170,13 @@ export const UserDashboard = () => {
   };
 
   useEffect(() => {
-    const transaction: any = localStorage.getItem("transaction");
-    const transactionID = localStorage.getItem("jual_id");
-
     if (transaction) {
       const itemStr = JSON.parse(transaction);
       const value = JSON.parse(itemStr?.value);
       if (itemStr.expiry < Date.now()) {
         localStorage.removeItem("transaction");
       }
+      setOpen(true);
       setForm(value);
     } else if (menuList.length > 0) {
       setForm(
@@ -160,7 +188,7 @@ export const UserDashboard = () => {
         })),
       );
     }
-  }, [menuList]);
+  }, [menuList, transactionList]);
 
   const formMapping = (params: string) => {
     const label = params === "jumlah" ? "jumlah" : "sisa";
@@ -225,15 +253,39 @@ export const UserDashboard = () => {
           }
         />
       )}
+      {successCreateAlert && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleCheck size={20} className="text-[#119184]" />
+              <div className="text-[#119184]">
+                <h2 className="text-sm font-bold">
+                  Transaksi hari ini dimulai!
+                </h2>
+                <p className="text-sm">Catat semua barang dengan benar.</p>
+              </div>
+            </div>
+          }
+        />
+      )}
       {alert && (
         <Alert
           cancel={() => setAlert(!alert)}
           confirm={() => {
             createDetailTransaction();
           }}
+          title="Tutup Transaksi Hari Ini?"
+          message="Setelah ditutup, Anda tidak dapat menambah transaksi baru untuk hari
+            ini. Pastikan semua transaksi sudah tercatat dengan benar."
         />
       )}
-      <Header openParameter={open} />
+      <Header
+        openParameter={open}
+        navbarList={[
+          { name: "dashboard", path: "/dashboard" },
+          { name: "history", path: "/history" },
+        ]}
+      />
       <div className="flex gap-4 mt-10">
         <CalculateCard
           title="Omzet Hari Ini"

@@ -1,4 +1,4 @@
-const toRupiah = (value: number): string => {
+const toRupiah = (value: number): String => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -6,7 +6,7 @@ const toRupiah = (value: number): string => {
     maximumFractionDigits: 0,
   }).format(value);
 };
-const toRupiahNoRp = (value: number): string => {
+const toRupiahNoRp = (value: number): String => {
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,

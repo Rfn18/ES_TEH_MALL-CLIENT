@@ -1,4 +1,5 @@
 import {
+  CircleAlert,
   CircleCheck,
   Eye,
   EyeClosed,
@@ -18,10 +19,12 @@ export const Login = () => {
     password: "",
   });
   const [alert, setAlert] = useState<boolean>(false);
+  const [errorAlert, setErrorAlert] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const bareer = localStorage.getItem("bareer_token");
+  const user = localStorage.getItem("user");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -29,7 +32,6 @@ export const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(data);
 
     try {
       setLoading(true);
@@ -48,15 +50,22 @@ export const Login = () => {
 
       const result = await response.json();
 
-      if (!bareer) {
+      if (!bareer || !user) {
         localStorage.setItem("bareer_token", result.access_token);
+        localStorage.setItem("user", result.user.role);
       } else {
         localStorage.removeItem("bareer_token");
+        localStorage.removeItem("user");
         localStorage.setItem("bareer_token", result.access_token);
+        localStorage.setItem("user", result.user.role);
       }
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
+      setErrorAlert(!errorAlert);
+      setTimeout(() => {
+        setErrorAlert(false);
+      }, 5000);
     } finally {
       setLoading(false);
     }
@@ -92,6 +101,21 @@ export const Login = () => {
           }
         />
       )}
+      {errorAlert && (
+        <Toast
+          message={
+            <div className="flex items-center justify-center gap-4">
+              <CircleAlert size={20} className="text-[#FF4400]" />
+              <div className="text-[#FF4400]">
+                <h2 className="text-sm font-bold">Invalid Credentials</h2>
+                <p className="text-sm">
+                  Email atau password salah. Silahkan coba lagi
+                </p>
+              </div>
+            </div>
+          }
+        />
+      )}
       <div className="w-full flex flex-col items-center gap-2">
         <h1 className="text-xl font-semibold">Login To Your Account</h1>
         <p className="text-sm opacity-70">Enter your credentials to continue</p>
@@ -119,6 +143,7 @@ export const Login = () => {
             <input
               type={showPw ? "text" : "password"}
               name="password"
+              minLength={8}
               placeholder="Enter Your password"
               className="w-full h-full text-sm outline-none"
               onChange={handleChange}

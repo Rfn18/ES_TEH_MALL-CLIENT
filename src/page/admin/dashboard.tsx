@@ -1,16 +1,9 @@
-import {
-  Banknote,
-  Calculator,
-  Layers,
-  ShoppingBag,
-  Store,
-  TrendingUp,
-  UserRoundPlus,
-  UtensilsCrossed,
-} from "lucide-react";
+import { Banknote, Calculator, ShoppingBag, TrendingUp } from "lucide-react";
 import { Header } from "../../components/ui/Header";
-import { CardForm } from "../../components/ui/CardForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toRupiah } from "../../utils/ToRupiah";
+import { TransactionList } from "../../components/ui/TransactionList";
+import api from "../../services/api";
 
 interface cardProps {
   title: string;
@@ -19,10 +12,91 @@ interface cardProps {
   icon: any;
 }
 
-export type TabType = "menu" | "jenis" | "user" | "stand";
+interface StandForm {
+  id: number;
+  kd_stand: string;
+  nama_stand: string;
+  lokasi: string;
+}
+
+interface transactionProps {
+  id: number;
+  no_transaksi: string;
+  stand_id: string;
+  user_id: number;
+  total_biaya_produksi: number;
+  total_omzet: number;
+  selisih: number;
+  tanggal: string;
+  menu: {
+    id: number;
+    kd_menu: string;
+    jenis_id: string;
+    nama_menu: string;
+    laku: number;
+    biaya_produksi: number;
+    harga_satuan: number;
+  };
+}
 
 export const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("menu");
+  const [transactionList, setTransactionList] = useState<transactionProps[]>(
+    [],
+  );
+  const [standList, setStandList] = useState<StandForm[] | null>(null);
+
+  const fetchingTransaction = async () => {
+    try {
+      const response = await api.get(`/jual`);
+
+      const data = response.data.data.datas?.data;
+      setTransactionList(data);
+    } catch (error) {
+      console.error("failed fetching data.", error);
+    }
+  };
+
+  const fetchStandData = async () => {
+    try {
+      const response = await api.get(`/stand`);
+      const data = await response.data.data;
+      setStandList(data.datas.data);
+    } catch (error) {
+      console.error("Error fetching Stand data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchingTransaction();
+    fetchStandData();
+  }, []);
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const todayTransactions = transactionList?.filter((item) =>
+    item.tanggal.startsWith(today),
+  );
+
+  const totalOmzet = todayTransactions?.reduce(
+    (acc, item) => acc + Number(item.total_omzet),
+    0,
+  );
+
+  const totalProfit = todayTransactions?.reduce(
+    (acc, item) => acc + Number(item.selisih),
+    0,
+  );
+
+  const totalHPP = todayTransactions?.reduce(
+    (acc, item) => acc + Number(item.total_biaya_produksi),
+    0,
+  );
+
+  const totalSales = todayTransactions?.reduce((acc, item) => {
+    const menus = Array.isArray(item.menu) ? item.menu : [item.menu];
+
+    return acc + menus.reduce((a, b) => a + b.laku, 0);
+  }, 0);
 
   const CalculateCard = ({ title, point, desc, icon }: cardProps) => {
     return (
@@ -39,11 +113,17 @@ export const Dashboard = () => {
 
   return (
     <div className="w-full px-16 py-8">
-      <Header openParameter={true} />
+      <Header
+        openParameter={false}
+        navbarList={[
+          { name: "dashboard", path: "/admin/dashboard" },
+          { name: "management", path: "/admin/management" },
+        ]}
+      />
       <div className="flex gap-4 mt-10">
         <CalculateCard
           title="Omzet Hari Ini"
-          point={`Rp. ${2}`}
+          point={todayTransactions ? toRupiah(totalOmzet) : "Rp 0"}
           desc="Total pendapatan kotor"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#119184]/10 self-start">
@@ -53,7 +133,7 @@ export const Dashboard = () => {
         />
         <CalculateCard
           title="Item Terjual"
-          point={`2`}
+          point={todayTransactions ? totalSales.toString() : "0"}
           desc="Total produk terjual"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#35ad61]/10 self-start">
@@ -63,7 +143,7 @@ export const Dashboard = () => {
         />
         <CalculateCard
           title="Laba Bersih"
-          point={`Rp. ${2}`}
+          point={todayTransactions ? toRupiah(totalProfit) : "Rp 0"}
           desc="Estimasi keuntungan"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#2daa5a]/10 self-start">
@@ -73,7 +153,7 @@ export const Dashboard = () => {
         />
         <CalculateCard
           title="HPP (Biaya)"
-          point={`Rp. ${2}`}
+          point={todayTransactions ? toRupiah(totalHPP) : "Rp 0"}
           desc="Total harga pokok"
           icon={
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#f7b441]/10 self-start">
@@ -82,43 +162,7 @@ export const Dashboard = () => {
           }
         />
       </div>
-      <div className="mt-4 ">
-        <div>
-          <h1 className="font-bold text-2xl text-[#2f524a]">Management Menu</h1>
-          <p className="text-sm text-[#2f524a]/70">
-            Kelola kategori dan item menu untuk outlet Anda
-          </p>
-        </div>
-        <div className="mt-4 flex bg-[#119184]/10 w-fit p-1 rounded-xl">
-          <button
-            className={`flex items-center gap-2 text-sm font-semibold px-12 py-2 rounded-lg cursor-pointer ${activeTab === "menu" ? "bg-[#ffff] text-black" : "text-black"}`}
-            onClick={() => setActiveTab("menu")}
-          >
-            <UtensilsCrossed size={16} /> Menu
-          </button>
-          <button
-            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "jenis" ? "bg-[#ffff] text-black" : ""}`}
-            onClick={() => setActiveTab("jenis")}
-          >
-            <Layers size={16} /> Jenis
-          </button>
-          <button
-            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "user" ? "bg-[#ffff] text-black" : ""}`}
-            onClick={() => setActiveTab("user")}
-          >
-            <UserRoundPlus size={16} /> User
-          </button>
-          <button
-            className={`flex items-center gap-2 text-sm text-black px-12 py-2 rounded-lg cursor-pointer ${activeTab === "stand" ? "bg-[#ffff] text-black" : ""}`}
-            onClick={() => setActiveTab("stand")}
-          >
-            <Store size={16} /> Stand
-          </button>
-        </div>
-      </div>
-      <div className="p-6 mt-4 w-full bg-white border border-[#119184]/20 rounded-2xl">
-        <CardForm activeTab={activeTab} />
-      </div>
+      <TransactionList standList={standList || []} />
     </div>
   );
 };
